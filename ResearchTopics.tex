@@ -6,8 +6,8 @@
 \usepackage[shortlabels]{enumitem}
 \usepackage{subcaption}
 \usepackage{svg}
-% \usepackage[disable]{todonotes}
-\usepackage{todonotes}
+\usepackage[disable]{todonotes}
+% \usepackage{todonotes}
 \usepackage{url}
 
 \title{Research topics}
@@ -53,45 +53,55 @@ As the system will be used by people who are not necessarily designers or progra
 \end{enumerate}
 
 \section{Background}
-The generation of a virtual terrain can be split up in multiple components which are connected to create a complete landscape. Firstly, the terrain itself needs to be created, after which other components are generated that interact with the terrain to create the complete terrain. The following sections describe prior research and techniques of generating individual components, as well as different ways that are proposed to connect these components.
+The generation of a virtual terrain can be split up in multiple components which are connected to create a complete landscape. Firstly, the terrain itself needs to be created, after which other components are generated that interact with the terrain to create the complete terrain. The following sections describe prior research and techniques for generating individual components, as well as different ways that are proposed to connect these components.
 
 \subsection{Generation of terrain}
-The topic of procedural terrain generation has been researched for multiple decades. A 2-dimensional height map, represented as a grayscale image, is the most common technique for generating terrain. When converting this height map to a 3-dimensional terrain, a 3D plane uses the height map to scale the terrain to a specified height. This approach is widely used due to its simplicity but has some downsides. Because the height map is projected onto the plane, the terrain cannot have multiple sections of terrain overlapping each other, such as overhangs or caves. Although some solutions allow for overhangs \cite{gamito_procedural_2003}, they usually require solutions tailored to the desired terrain.
+The topic of procedural terrain generation has been researched for multiple decades. A 2-dimensional height map, represented as a grayscale image, is the most common technique for generating terrain. When converting this height map to a 3-dimensional terrain, a 3D plane uses the height map to scale each vertex of the terrain to a specified height. This approach is widely used due to its simplicity but has some downsides. Because the height map is projected onto the plane, the terrain cannot have multiple sections of terrain overlapping each other, such as overhangs or caves. Although some solutions allow for overhangs \cite{gamito_procedural_2003}, they usually require solutions tailored to the desired terrain.
 
 Alternatively, the terrain can be generated using a volumetric data structure, such as a 3-dimensional grid \cite{dey_procedural_2018}. With this approach, the generated terrain depends on whether the volumes of each location in the grid are filled. The most famous example that uses a voxel-based terrain is the video game Minecraft \footnote{Minecraft. From \url{https://minecraft.net}, retrieved on 28-11-2023}, which uses voxels to create a crude, blocky terrain. Fine-grained terrains can also be transformed into smooth terrain using techniques such as the surface nets method \cite{gibson_constrained_1998}. Although this approach allows for complex structures including caves \cite{cui_voxel-based_2011} and overhangs, the limitation of this approach is the larger storage size of all data.
 
 The following sections will focus on generating specific parts of a landscape, focusing mainly on techniques using height maps instead of volumetric data structures. These sections provide insight into how specific parts of the landscape are generated.
 
 \subsubsection{Fractal terrain} \todo{Images}
-A popular approach to generate procedural terrain is to use fractals. In this approach, a terrain function is evaluated on multiple scales to generate terrain that has large-scale features but is also detailed on a lower scale \cite{shaker_procedural_2016}. One way to create such terrain is to use noise functions such as Perlin noise \cite{musgrave_synthesis_1989}, where the function is evaluated on multiple frequencies, and summed to get the total height of the terrain. Because the noise is calculated on multiple frequencies, the terrain becomes less smooth, and both the large-scale terrain, as well as details, are created. 
+A popular approach to generate procedural terrain is to use fractals. In this approach, a terrain function is evaluated on multiple scales to generate terrain that has large-scale features but is also detailed on a lower scale \cite{shaker_procedural_2016}. One way to create such terrain is to use noise functions such as Perlin noise \cite{musgrave_synthesis_1989}, where the function is evaluated on multiple frequencies and summed to get the total height of the terrain. Because the noise is calculated on multiple frequencies, the terrain becomes less smooth, and both the large-scale terrain, as well as details, are created. 
 Because noise functions only depend on the input coordinates, these algorithms can be applied easily to GPU-based implementations \cite{schneider_real-time_2006}. \todo{Show generated noise images}
 
-Instead of noise functions, a midpoint displacement algorithm is another way to generate terrain. With this algorithm, a triangle or grid gets subdivided into smaller primitives, and the height of each midpoint is updated with a random value. This value grows smaller with each iteration, resulting in small changes in local areas, and large changes in global areas \cite{sala_mathematics_nodate}. One type of midpoint displacement algorithm, the diamond-square algorithm recursively subdivides a grid of points to approximate Fractal Brownian motion \cite{miller_definition_1986}. This algorithm is visualised in figure \ref{fig:diamond_square}
+Instead of noise functions, a midpoint displacement algorithm is another way to generate terrain. With this algorithm, a triangle or grid gets subdivided into smaller primitives, and the height of each midpoint is updated with a random value. This value grows smaller with each iteration, resulting in small changes in local areas, and large changes in global areas \cite{sala_mathematics_2002}. One type of midpoint displacement algorithm, the diamond-square algorithm recursively subdivides a grid of points to approximate Fractal Brownian motion \cite{miller_definition_1986}. This algorithm is visualised in figure \ref{fig:diamond_square}
 
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/Diamond_Square}
-    \caption{Two iterations of the diamond-square algorithm. The yellow dots represent the vertices manipulated in each operation, and the black dots represent the values used in interpolation. From \cite{ewin_by_nodate}}
+    \caption{Two iterations of the diamond-square algorithm. The yellow dots represent the vertices manipulated in each operation, and the black dots represent the values used in interpolation\protect\footnotemark.}
     \label{fig:diamond_square}
 \end{figure}
+
+\footnotetext{By Christopher Ewin - Own work. Retrieved from \url{https://commons.wikimedia.org/w/index.php?curid=42510593}}
 
 Instead of using a single approach, the combination of multiple functions, such as adding Voronoi noise to a midpoint displacement map, can also result in different types of terrains \cite{olsen_realtime_2004}.
 
 \subsubsection{Erosion algorithms}
 Although using fractal terrain works well to generate terrains, the self-similar nature of the techniques used does not result in realistic-looking terrain. Because of this, physical simulation is often used to approximate more realistic terrain. Most techniques follow processes that resemble erosion, which are divided into hydraulic erosion and thermal weathering \cite{musgrave_synthesis_1989}. These types of simulation are mainly used to enhance the quality of a terrain generated by fractal brownian motion, instead of being used to fully generate a terrain.
 
-Hydraulic erosion models the use of water to transport sediment from higher locations to lower locations. This can be used in conjunction with rivers, or by simulating rainfall and water transport. There are several techniques for this simulation, implemented on both the CPU and GPU \cite{benes_visual_2002} \cite{stava_interactive_nodate}. Hydraulic erosion works by discretizing the surface, where each chunk contains the height of the terrain, as well as the amount of water contained in the chunk. Updating the state of the simulation is done using Cellular automata, with each iteration interchanging water and sediment between neighbours \cite{dambrosio_cellular_2001}.
-\todo{Show erosion image}
+Hydraulic erosion models the use of water to transport sediment from higher locations to lower locations. This can be used in conjunction with rivers, or by simulating rainfall and water transport. There are several techniques for this simulation, implemented on both the CPU and GPU \cite{benes_visual_2002} \cite{stava_interactive_2008}. Hydraulic erosion works by discretizing the surface, where each chunk contains the height of the terrain, as well as the amount of water contained in the chunk. Updating the state of the simulation is done using Cellular automata, with each iteration interchanging water and sediment between neighbours \cite{dambrosio_cellular_2001}. An example of a step in this algorithm can be seen in figure \ref{fig:hydraulic-erosion}.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/Hydraulic_erosion.PNG}
+    \caption{An example of water transport in a hydraulic erosion simulation, from \cite{olsen_realtime_2004}.}
+    \label{fig:hydraulic-erosion}
+\end{figure}
+
+
 
 Thermal erosion describes the way that material is eroded by several processes that break down the terrain, from which the material moves down a slope to accumulate at the bottom \cite{musgrave_synthesis_1989}. Similar to hydraulic erosion, it works by using cellular automata to transport soil to neighbouring locations. Instead of using water, the difference in height of neighbours is compared, and if it exceeds a threshold a portion of the terrain is moved to the lower level.
 
-\subsubsection{Agent-based algorithms} \todo{Show agent image}
-The previous algorithms manipulate the terrain as a whole. Another option would be to use software agents to manipulate the terrain on a local scale. In their paper \cite{doran_controlled_2010}, Doran and Parberry have used multiple types of software agents that create coastlines, mountains and rivers. Each agent has a location on the map and perceives their direct environment. Each agent can modify the terrain using a directive, such as generating a coastline that connects two randomly generated points. In more recent work, software agents were expanded to offer more control to the designer \cite{skold_generating_2023}. In other work, software agents were used to generate a road network and place buildings to form a city \cite{lechner_procedural_2003}.
+\subsubsection{Agent-based algorithms}
+The previous algorithms manipulate the terrain as a whole. Another option would be to use software agents to manipulate the terrain on a local scale. In their paper \cite{doran_controlled_2010}, Doran and Parberry have used multiple types of software agents that create coastlines, mountains and rivers. Each agent has a location on the map and perceives their direct environment. They can modify the terrain using a directive, such as generating a coastline that connects two randomly generated points or creating a river connecting the top of a mountain and the coast. In more recent work, software agents were expanded to offer more control to the designer \cite{skold_generating_2023}. In other work, software agents were used to generate a road network and place buildings to form a city \cite{lechner_procedural_2003}.
 
 \subsubsection{Rivers}
-On a terrain, the generation of rivers is directly related to the landscape itself. Rivers have requirements to be placed in a landscape, such as that the direction of the river should move along a flat part of terrain, or move downwards.
+On a terrain, the generation of rivers is directly related to the landscape itself. Rivers have the requirement to be placed in a landscape, such as that the direction of the river should move along a flat part of terrain, or move downwards.
 
-One way of generating rivers is to generate rivers and elevation at the same time. Belhadj and Audibert \cite{belhadj_modeling_2005} generate a network of rivers and ridges, and use this combined with a modified midpoint displacement algorithm to generate the rest of the terrain. After ridges are randomly generated, points are placed on ridges, that simulate gravity to roll down the slope. With this approach, rivers show realistic behaviour connected to the elevation of the ridges.
+One way of generating rivers is to generate rivers and elevation at the same time. Belhadj and Audibert \cite{belhadj_modeling_2005} generate a network of rivers and ridges, and use this combined with a modified midpoint displacement algorithm to generate the rest of the terrain. After ridges are randomly generated, points are placed on ridges and simulate gravity to roll down the slope. With this approach, rivers show realistic behaviour connected to the elevation of the ridges.
 
 If the terrain consists of both mountains and coastlines, a river can also be generated by finding a random point on the coast and a random point on the mountain, and generating a random path between these points \cite{doran_controlled_2010} \cite{prusinkiewicz_fractal_1993}.
 
@@ -108,16 +118,28 @@ Alternatively, rivers can be generated by placing several control points on the 
 
 
 \subsubsection{Texturing}
-To create a terrain, adding textures is vital in making the terrain realistic. One approach is to create textures beforehand for different types of terrain and to blend these textures depending on factors such as the height and steepness of the terrain \cite{schneider_real-time_2006} \cite{kahoun_realtime_2013}. With this approach, areas near water use textures that represent beaches, such as sand, while steep peaks use a stone texture. Additionally, the texture can be defined by the ecosystem the terrain is part of \cite{hammes_modeling_2001}. Edges between ecosystems can be generated by blending different types of textures.
+To create a terrain, adding textures is vital in making the terrain realistic. One approach is to create textures beforehand for different types of terrain and to blend these textures depending on factors such as the height and steepness of the terrain \cite{schneider_real-time_2006} \cite{kahoun_realtime_2013}. With this approach, areas near water use textures that represent beaches such as sand, while steep peaks use a stone texture. Additionally, the texture can be defined by the ecosystem the terrain is part of \cite{hammes_modeling_2001}. Edges between ecosystems can be generated by blending different types of textures.
 
 \subsection{Placement of vegetation}
-When generating a landscape representing nature, a large part of this is placing vegetation in ways that are realistic and visually appealing. Adding vegetation to a landscape consists of different kinds of elements, from small vegetation such as grass and small bushes to large structures such as trees. The following sections describe multiple ways of placing and distributing vegetation.
+When generating a landscape representing nature, an important step is placing vegetation in ways that are realistic and visually appealing. Adding vegetation to a landscape consists of different kinds of elements, from small vegetation such as grass and small bushes to large structures such as trees. The following sections describe multiple ways of placing and distributing vegetation.
 
 \subsubsection{Distributed placement}
 An easy way to place vegetation is by planting each plant randomly. As each plant or tree is a physical object, plants cannot be placed too close to each other or they would overlap.
 
-\todo{Show PDD noise}
-One way to solve this is to specify a boundary radius and place plants randomly in locations where the closest plant is further away than that distance. Although this works, Casey Muratori showed in a blog post that this naive approach is inefficient when the density of plants increases \cite{muratori_color_2014}. A more efficient way to generate random positions is to use Poisson Distribution Disks (PDDs). A Poisson distribution disk allows patterns to be generated where each point has a minimal separation. Efficient algorithms use Voronoi diagrams to create these patterns with a time complexity of $O(N \log{} N)$ \cite{jones_efficient_2006}. Another implementation, based on fluid simulations, is where a smoothing kernel moves an initial set of points so that the standard deviation of the distances between points is lowered \cite{jiang_blue_2015}.
+\begin{figure}
+    \begin{subfigure}[h]{0.5\linewidth}
+        \includegraphics[width=\linewidth]{figures/distribution_random.png}
+        \caption{Random distribution}
+    \end{subfigure}
+    \begin{subfigure}[h]{0.5\linewidth}
+        \includegraphics[width=\linewidth]{figures/distribution_pdd.png}
+        \caption{PDD distribution}
+    \end{subfigure}
+    \caption{Comparison of Random and Poisson Disk Distributions for 200 samples}
+    \label{fig:random-distributions}
+\end{figure}
+
+One way to solve this is to specify a boundary radius and place plants randomly in locations where the closest plant is further away than that distance. Although this works, Casey Muratori showed in a blog post that this naive approach is inefficient when the density of plants increases \cite{muratori_color_2014}. A more efficient way to generate random positions is to use Poisson Distribution Disks (PDDs). A Poisson distribution disk allows patterns to be generated where each point has a minimal separation, as shown in figure \ref{fig:random-distributions}. Efficient algorithms use Voronoi diagrams to create these patterns with a time complexity of $O(N \log{} N)$ \cite{jones_efficient_2006}. Another implementation, based on fluid simulations, uses a smoothing kernel which moves an initial set of points so that the standard deviation of the distances between points is lowered \cite{jiang_blue_2015}.
 
 Another way of distributing points is to have an initial set of points, for instance, points on a grid, and to randomly move each point around its initial location. Although simple, this technique has been used to create points that look seemingly random \cite{hammes_modeling_2001} \cite{van_muijden_gpu-based_2017}.
 
@@ -178,13 +200,12 @@ In the previous example, the biome was determined by climate parameters. The typ
 The previous sections have elaborated on different components used in procedural terrain generation. To generate terrain that resembles a landscape, these features must be combined. The following section describes different ways that these components can be connected, and how the requirements of each component interact with other components.
 
 \subsubsection{Level of detail}
-When placing vegetation, there is a difference between placing large trees and smaller bushes and grass. Trees are larger, and because their branches have a larger radius where other trees cannot grow. For bushes and grass, this is much smaller, and can also grow under the branches. In their paper, Hammes defines eight different layers that each cover a different type of vegetation on a different scale \cite{hammes_modeling_2001}. For a large scene, this can be used as a level of detail to reduce the complexity of areas that are further away and to increase the detail for closer sections of terrain. To resolve placement conflicts between layers, do Nascimento added a function to calculate the zone of influence of objects on a higher layer, which acts as a probability mask for objects on a lower layer \cite{do_nascimento_gpu-based_2018}.
-\todo{show level of detail image}
+When placing vegetation, there is a difference between placing large trees and smaller bushes and grass. Trees are larger and the branches prevent other trees from being placed too close to each other. For bushes and grass, this is much smaller, and they can also grow under the branches. In their paper, Hammes defines eight different layers that each cover a different type of vegetation on a different scale \cite{hammes_modeling_2001}. For a large scene, this can be used as a level of detail to reduce the complexity of areas that are further away and to increase the detail for closer sections of terrain. To resolve placement conflicts between layers, do Nascimento added a function to calculate the zone of influence of objects on a higher layer, which acts as a probability mask for objects on a lower layer \cite{do_nascimento_gpu-based_2018}.
 
 \subsubsection{Probabilities and masking}
 When placing vegetation on a terrain, it cannot be placed on certain areas. For instance in water, or on slopes that are too steep. There have been multiple ways to resolve these issues. When categorising the terrain into ecotypes, as done by Hammes \cite{hammes_modeling_2001}, parts of the terrain that are unsuited for vegetation simply will not include any vegetation at all. Alternatively, Olsen assigns placement scores based on flatness and connected areas that allows placing buildings aimed at an Real-Time Strategy (RTS) game \cite{olsen_realtime_2004}. Larger structures can therefore only be placed on areas where the slope is similar for all tiles under the structure.
 
-Alternatively, as the terrain is generated using a 2D height map, other 2D maps can be used to mask the placement of vegetation. In the video game Horizon Zero Dawn maps that represent water, roads and trees are combined to provide masks that can be used to generate other types of vegetation \cite{van_muijden_gpu-based_2017}. Instead of using height maps, combining different probability functions can yield a similar result \cite{weier_generating_2013}.
+Alternatively, when the terrain is generated using a 2D height map, other 2D maps can be used to mask the placement of vegetation. In the video game Horizon Zero Dawn maps that represent water, roads and trees are combined to provide masks that can be used to generate other types of vegetation \cite{van_muijden_gpu-based_2017}. Instead of using height maps, combining different probability functions can yield a similar result \cite{weier_generating_2013}.
 
 \subsubsection{Agent-based simulation}
 In a previous section, the use of software agents has been used to create certain parts of the terrain. As software agents work by manipulating the terrain locally, they can be used to work on the terrain generated by previous agents \cite{doran_controlled_2010}. For instance, the location that a mountain agent visited to create a mountain can be used by a river agent as a starting location for a river that travels down the mountain. Because agents are executed in sequence, the order of agents allows any constraints from agents to be solved linearly, such as vegetation agents being executed after river agents to avoid placing vegetation in the water.
@@ -199,17 +220,18 @@ In another paper, Newlands and Zauner have created a framework that generates te
 The system of do Nascimento aims to combine terrain, rivers and vegetation \cite{do_nascimento_gpu-based_2018}. The terrain is generated by providing height and river maps. From these maps, certain features such as the slope and moisture of the ground are calculated. These maps act as a probability distribution for selecting the vegetation to be placed in the area, with each plant having a preference for elevation, slope and moisture. The plants themselves are placed by using a PDD which uses the distribution maps to filter which plants can be added. To place different kinds of vegetation, different levels of detail are used. To prevent overlapping plants of different layers, each layer adds a zone of influence to the distribution maps, lowering the chance of plants being placed too close to other plants.
 
 \subsubsection{Validating terrain}
-When generating terrain, the combination of different features can have constraints. Some constraints have been mentioned before, such as the overlap between different components, but other constraints, such as the availability of flatness in the terrain can be a demand of the system as well.
+When generating terrain, the combination of different features can have constraints. Some constraints have been mentioned before, such as the overlap between different components, but other constraints, such as the availability of flatness in the terrain, can be a demand of the system as well.
 
 The terrain generation method from Olsen \cite{olsen_realtime_2004} contains several criteria for creating maps usable in RTS games. The two main criteria are areas where units can move around should largely be connected, while the other is that the terrain should be flat enough for buildings to be placed. The model checks this by analysing the slope of the terrain and giving a score for different features of the terrain. The system does not modify the terrain to get a better score but is only used to verify the quality of a specific terrain.
 
-In the framework created by Smelik e.a. \cite{smelik_declarative_2011}, the landscape is created by combining different layers. Each layer represents a different part of the system, such as the vegetation layer containing all plants and trees, while the water layer consists of rivers and lakes. To resolve any conflicts in the constraints of each layer, each feature interacts with the system by either claiming a piece of terrain to use exclusively, or a feature can request to modify part of the landscape to solve its constraint. Conflicts arise when multiple features try to claim the same area. When this happens, the system can combine the different claims into a connecting structure, such as creating a bridge when a river and a road attempt to claim the same location. When a connecting structure is not possible, each feature has different priorities with which the system can decide to give the claim to one of the features.\
+In the framework created by Smelik e.a. \cite{smelik_declarative_2011}, the landscape is created by combining different layers. Each layer represents a different part of the system, such as the vegetation layer containing all plants and trees, while the water layer consists of rivers and lakes. To resolve any conflicts in the constraints of each layer, each feature interacts with the system by either claiming a piece of terrain to use exclusively, or a feature can request to modify part of the landscape to solve its constraint. Conflicts arise when multiple features try to claim the same area. When this happens, the system can combine the different claims into a connecting structure, such as creating a bridge when a river and a road attempt to claim the same location. When a connecting structure is not possible, each feature has different priorities with which the system can decide to give the claim to one of the features.
+
+A category of Procedural Content Generation, Search-based Procedural Content Generation (SBPCG) takes a special approach to validation. While regular PCG usually contains a test to validate whether the content is correct, SBPCG rates the quality based on a fitness function \cite{togelius_search-based_2010}. To improve the generation, the result of the evaluation is used to improve further iterations, which is mainly done using an evolutionary algorithm. This requires a piece of content to be generated multiple times, but it allows designers to provide a qualitative way of validating the generation process.
 
 % Write reflection / start of methodology
 % Reflect on what has already been done, and what I will do with it.
 % connect the research questions back into the background
 
-\todo{Add dates/keys to citations for proper sorting}
 \bibliographystyle{plain} % We choose the "plain" reference style
 \bibliography{references} % Entries are in the refs.bib file
 
