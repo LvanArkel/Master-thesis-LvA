@@ -10,19 +10,18 @@
 % \usepackage{todonotes}
 \usepackage{url}
 
-\title{Research topics}
+\title{Research topics\\Fixed-viewpoint procedural generation of digital nature landscapes.}
 \author{Lars van Arkel}
-
 
 \begin{document}
  
 \maketitle
 
 \section{Introduction}
-Procedural Content Generation (PCG) has been actively researched in computer graphics for years. For developers generating virtual content can become time-intensive, and PCG has been used to reduce the workload of creating virtual terrains. One important aspect is the trade-off between the control the user has over the generated terrain against the amount of effort which is required to create the terrain. For this research, we will be designing a system to generate complete landscapes which will be rendered from ground level. Besides combining multiple features, this research will aim to give a qualitative evaluation of the generated terrain with rules that can be specified by the designer. This system will then be used as part of the Growing Roots research project.
+Procedural Content Generation (PCG) has been actively researched in computer graphics for years. For developers generating virtual content can become time-intensive, and PCG has been used to reduce the workload of creating virtual terrains. One important aspect is the trade-off between the control the user has over the generated terrain against the amount of effort required to create the terrain. For this research, we will be designing a system to generate complete landscapes which will be rendered from ground level. Besides combining multiple features, this research will aim to give a qualitative evaluation of the generated terrain with rules that can be specified by the designer. This system will then be used to create landscapes as part of the Growing Roots research project.
 
 \section{Problem statement}
-As part of the Growing Roots research project \footnote{Growing Roots. From \url{https://growingroots.nl}, retrieved at 16-11-2023}, a device called the ``virtual window" is developed \footnote{Design2Connect - TexTown Games. From \url{https://textowngames.nl/portfolio/design2connect/}, retrieved at 11-16-2023}. This device tracks the position of a person in front of a monitor and projects a landscape on the screen based on where the person is standing. Currently, only handcrafted landscapes are used for testing the system. For further research related to emotional impressions of landscapes, more environments are needed that differ in visually distinguishable parameters, such as the density of trees or the color and types of vegetation used. Handcrafting landscapes takes a significant amount of time, so the ability to create more terrains automatically is required. The landscapes generated will be landscapes of nature, with some man-made structures such as roads or benches. 
+As part of the Growing Roots research project \footnote{Growing Roots. From \url{https://growingroots.nl}, retrieved at 16-11-2023}, a device called the ``virtual window" is developed by the company TexTown Games. \footnote{Design2Connect - TexTown Games. From \url{https://textowngames.nl/portfolio/design2connect/}, retrieved at 11-16-2023}. This device tracks the position of a person in front of a monitor and projects a landscape on the screen based on where the person is standing. Currently, only handcrafted landscapes are used for testing the system. For further research related to emotional impressions of landscapes, more environments are needed that differ in visually distinguishable parameters, such as the density of trees or the color and types of vegetation used. Handcrafting landscapes takes a significant amount of time, so the ability to create more terrains automatically is required. The landscapes generated will be landscapes of nature, with some man-made structures such as roads or benches. 
 
 The generated terrain will only be used for the virtual window, which means that the camera will not move around the landscape. This limits the size and amount of terrain that needs to be generated. Therefore, each feature's order and properties will be generated with this rule in consideration.
 
@@ -51,6 +50,27 @@ As the system will be used by people who are not necessarily designers or progra
         \item How can the terrain generation be influenced by the validation to create terrain conforming to certain rules?
     \end{enumerate}
 \end{enumerate}
+
+\section{Approach}
+The proposed research questions will be answered with multiple steps. Firstly, the requirements of the system, as defined by RQ 1.1, 2.1 and 3.1, will be gathered from researchers involved with the Growing Roots project and the developers of TexTown Games, as well as related research on Digital nature. With this, we establish a scope for a small prototype to answer the research questions.
+
+For each of the research questions, the first sub-question is related to finding the requirements of the research question. These sub-questions will be answered in several ways. First, related research into procedural generation, digital nature and the Growing Roots research project will be analysed to find relevant topics. Additionally, brainstorming sessions with related stakeholders will refine the previously found requirements. These stakeholders consist of researchers part of the Growing Roots project, which will continue the research, and employees of TexTown Games involved with the project.
+
+For RQ 1.2, we can use the background literature for each of the required features to select an approach of generating each component individually. An implementation of this will be included in the prototype.
+
+When all requirements are gathered, an architecture of the system will be created that shows how the proposed system works. This architecture contains the interaction between different components (RQ 1.3), a connection between high-level features from a designer and the low-level features used by each component (RQ 2.2), as well as how validation techniques are used in landscape generation (RQ 3.2).
+
+From this architecture, a prototype will be created. Due to the technology already used by TexTown Games, this prototype will be created using the Unity game engine and C\# scripts \footnote{Unity Real-Time development platform, from \url{https://unity.com}}. To create landscapes, assets such as textures and models of vegetation, trees and man-made objects will be provided and the generation of these is not part of this research.
+
+%RQ 1.1 Brainstorm with researcher / company. Look at related research
+%RQ 1.2 Look at related research. Build prototype components for each individual component.
+%RQ 1.3 Define requirements for a landscape for a single point of view. Create an architecture to connect components.
+
+%RQ 2.1 Create requirements for different environments (tended/wild, open/closed, biomes) with researcher / company / background research.
+%RQ 2.2 Connect generation parameters to requirements. Adapt architecture to support parameters.
+
+%RQ 3.1 Brainstorm with researcher / TTG. In the brainstorm, find the usefulness of validating the requirements to future research.
+%RQ 3.2 Add validation to architecture. Decide how validation will be used to influence terrain generation
 
 \section{Background}
 The generation of a virtual terrain can be split up in multiple components which are connected to create a complete landscape. Firstly, the terrain itself needs to be created, after which other components are generated that interact with the terrain to create the complete terrain. The following sections describe prior research and techniques for generating individual components, as well as different ways that are proposed to connect these components.
