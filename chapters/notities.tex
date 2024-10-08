@@ -1,0 +1,10 @@
+Optimization for cuve/world combination
+
+- Connect triangles to intersecting chunks
+    - Save as Dictionary<Chunk, List<List<int>>> with the indices of each tri per curve.
+For each chunk:
+    For each curve, find all Tris using the list of integers
+    Perform intersection check
+
+
+Level ground of river before carving.

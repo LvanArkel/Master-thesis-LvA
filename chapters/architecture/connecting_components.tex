@@ -1,8 +1,24 @@
 \subsection{Connecting components}
-% Describe the architecture of how the different components combine
+% Describe how different components inter4act and how we have designed our architecture
 
-\subsubsection{River path planning}
-% TODO: Find a way to path a river
+\subsubsection{Architecture of the system}
+We have split up the tasks of generating the terrain into multiple components. Some of the components use the techniques described in the previous chapter to generate a single component of the system, while other components combine these components. The architecture of the system is shown in figure \ref{fig:system-architecture}. In this diagram, each different component of the system is shown in a rectangle, while each datatype is shown in a ellipse.
 
-\subsubsection{Vegetation selection}
-% TODO: Find a way to select vegetation
+In this system, we first generate the surface terrain, and a curve for each river. With this curve, we generate a fat curve. To improve the performance of the system, we calculate for each chunk which triangles of the river intersect with the bounds of the chunk. This is done by component (4). With this information, the terrain is modified with the riverbed, and the river is used to generate the initial deformation fields that is used to generate the object placements.
+
+The components labelled with the numbers (1), (2) and (3) are described in section \ref{sec:architecture-singlecomponent}. The rest of this section describes the other components of the system.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\linewidth]{figures/Architecture.drawio.png}
+    \caption{A block diagram of the system's architecture}
+    \label{fig:system-architecture}
+\end{figure}
+
+\subsubsection{Combining terrain and curves}
+To combine the river with the terrain we need to evaluate each point of the terrain, which is done by component (5). Using the method described in \cite{huijser_procedural_2010} we can check whether a point is located on the river, and at what part of the cross-section the point is located. With the cross-section profile provided the change in elevation is calculated. The height of the terrain is set to the base height of the terrain reduced by the river profile. To smoothen the riverbed, the base height is interpolated between the heights of the side of the river.
+
+\subsubsection{Masking object placement based on curves}
+
+\subsubsection{Combining object placement methods}
+

@@ -1,4 +1,4 @@
-\subsection{Generating components}
+\subsection{Generating components} \label{sec:architecture-singlecomponent}
 % Introduce the different components, and describe that each component has different parameters that are described in each section
 The proposed system consists of three different components. The first is the terrain. This terrain forms the basis of the landscape on which different features can be placed. The second component consists of water features. These water features, which consist of rivers and ponds, are generated based on a number of control points which are placed onto the terrain. Thirdly, the last component of the system is the placement of vegetation. Vegetation consists of different type of plants, ranging from small bushes to large trees. The generation of each component can be described with a number of parameters. While some parameters would be dependent on the initial settings of the terrain, others can wildly influence the type of landscape created.
 
@@ -18,6 +18,13 @@ To properly overlap different chunks, the last value of each heightmap is scaled
 The parameters that influence the algorithm are shown in table \ref{tab:perlin-parameters}. In this table we make a distinction between parameters that are set by the system because they are constant or implicit based on other systems such as the chunk system, and parameters that can be influenced by a designer.
 The width and depth of the system will be fixed, since the amount of vertices in a chunk is deemed to be constant. The offset and seed are implicit in the execution of the program, since the offset is defined by which chunk will be generated and the seed is constant per generation of the system, to provide the same base noise offsets for all chunks.
 
+% Width
+% Depth
+% Scale
+% Octaves
+% Persistance
+% Lacunarity
+
 \begin{table}[ht]
 \begin{tabularx}{\linewidth}{|l|l|l|X|}
 \hline
@@ -25,11 +32,9 @@ Name & Type & Bounds & Description\\
 \hline
 Width & Int & $\geq 1$ & The width of the heightmap in vertices\\
 
-Height & Int & $\geq 1$ & The depth of the heightmap in vertices\\
+Depth & Int & $\geq 1$ & The depth of the heightmap in vertices\\
 
-Offset & Vec2Int & $\mathbb{Z}^2$ & The chunk coordinates of the generating chunk\\
-
-Seed & Int & $\mathbb{Z}$ & The seed that initialises the random number generator\\
+Coordinates & Vec2Int & $\mathbb{Z}^2$ & The chunk coordinates of the generating chunk\\
 
 \hline
 
@@ -51,17 +56,39 @@ Lacunarity & Float & $\geq 0$ & How much the frequency of the noise is increased
 
 % Texturing (Still to be implemented)
 
-\subsubsection{Rivers and ponds}
+\subsubsection{Rivers}
 % The generation of rivers and ponds consist of 2 separate tasks.
-The generation of rivers and ponds consist of 2 separate tasks. The first step is to plan the route or shape of the river. After that, the path can be combined with a profile to generate the water.
-% First the path of the river needs to be established. This is done by placing points.
-% These points form a curve that is used to, together with a curve profile, generate a fat mesh that can be added to the curve.
-When the path of the river has been defined, a bezier curve is plotted through the points. When a pond is generated, the end of the curve is connected to the start. Like the system proposed by Huijser\cite{huijser_procedural_2010}, the curve is transformed into a mesh, the fat curve, that can be used in other stages of the program. To transform the path of a river to a fat curve, each curve point is given a width with which a line is constructed perpendicular to the curve. The line creates a triangle mesh with triangles between the curve points. When generating a pond, the middle of the curve is established by taking the average position of all points. The triangles of the mesh are defined by the middle of the curve and two subsequent curve points. Using this fat curve we can check whether a point is inside or outside the curve, and by calculating the barycentric coordinates of a point, the location of that point in the cross-section of the curve is derived. This coordinate can be used with the profile to derive the depth of the river at that location.
+The generation of rivers consist of 2 separate tasks. The first step is to plan the route shape of the river. After that, the path can be combined with a profile to generate the water.
+To plan the river, we use the same system as used by Teoh \cite{teoh_riverland_2009}. In this approach, we plan a route by placing points in a direction that is randomly offset each point. Between each point we place an additional point such that the river meanders along the route.
+To generate the shape of the river, we transform the curve into a fat curve, as done in the system proposed by Huijser \cite{huijser_procedural_2010}. For each point in the curve, the width of the river is used to construct a line perpendicular to the point on the curve. The line creates a triangle mesh with triangles between the curve points. To create a smoother curve, we interpolate the points using a bézier curve through the curve points. Using this fat curve we can check whether a point is inside or outside the curve, and by using the barycentric coordinates of a point we can calculate at what position in the cross-section of the curve a point belongs.
 
-% Parameters of path planning
+% Parameters of River
+The parameters used to plan the path of the curve are shown in Table \ref{tab:river-planning-paremeters}. The parameters used to create the fat curve are shown in Table \ref{tab:river-fatcurve-parameters}. % Add explanation of param types
 
-% Parameters of fat curve creation
-The parameters that describe the creation of the fat curve are shown in Table \ref{tab:river-fatcurve-parameters}
+% Parameter path planning
+\begin{table}[ht]
+\begin{tabularx}{\linewidth}{|l|l|l|X|}
+\hline
+Name & Type & Bounds & Description\\
+\hline
+
+count & int & $\geq 0$ & The amount of rivers to plan. \\
+
+width & float & $> 0$ & The width of the river. \\
+
+\hline
+
+segmentLength & float & $> 0$ & The distance between each river point. \\
+
+maxSegmentRotation & float & $\geq 0$ & The maximum angle that the river curves at each point.\\
+
+meanderAmplitude & float & $\geq 0 $ & The offset of the meandering points.\\ % TODO phrase better
+
+\hline
+\end{tabularx}
+\caption{The parameters used for river planning.}
+\label{tab:river-planning-parameters}
+\end{table}
 
 % Parameter table fatcurve
 \begin{table}[ht]
@@ -70,19 +97,14 @@ The parameters that describe the creation of the fat curve are shown in Table \r
 Name & Type & Bounds & Description\\
 \hline
 
-tangentLength & float & $\mathbb{R}$ & How far the tangents of the bezier curve are scaled. \\
+tangentLength & float & $> 0$ & The size of the tangents of the bezier curve. \\
 
-CurvePoint.Direction & Vec3 & $\mathbb{R}^3$ & For each point, the gradient along the curve\\
+interpolationPoints & int & $\geq 0$ & The amount of interpolation points on the curve. \\
 
-MeshSubdivisions & int & $\geq 0$ & How many points are interpolated between curvePoints\\
+ControlPoint.position & Vector3 & $\mathbb{R}^3$ & The position of each control point on the curve. \\
 
-\hline
+ControlPoint.width & float & $> 0$ & The width of the river along each control point. \\
 
-CurvePoint.Position & Vec3 & $\mathbb{R}^3$ & For each point in the curve, the position in the world\\
-
-CurvePoint.width & float & $> 0$ & For each point, the width of the river along the point\\
-
-closed & boolean & T/F & Whether the curve describes a river (F) or a pond (T) \\
 \hline
 
 \end{tabularx}
@@ -192,8 +214,6 @@ fieldSize & int & $> 0$ & The size of the array used as probability density func
 \caption{The parameters used for placing objects with a deformation kernel}
 \label{tab:deformation-kernel}
 \end{table}
-
-\todo{Table for deformation kernel parameters}
 
 % Elaborate PDD and explain second algorithm
 
