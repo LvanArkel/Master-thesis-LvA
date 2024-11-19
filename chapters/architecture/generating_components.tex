@@ -4,7 +4,7 @@ The proposed system consists of three different components. The first is the ter
 
 In this subsection, the generation of the different components is described in isolation from each other, as well as the parameters required for each component. For each parameter, a description is given what the parameter does in the generation of the component, and how the system can interact with the parameter.
 
-\subsubsection{Terrain}
+\subsubsection{Terrain} \todo{Add image of generated terrain.}
 % Describe what algorithm is chosen and why
 In our design, we have chosen to generate terrain using Fractal noise using Perlin noise \cite{musgrave_synthesis_1989}. The advantage of using noise functions is that the calculation of each separate point can be performed in parallel. Each chunk can be generated independent of other chunks.
 % Describe the alternative Diamond Square method, and why it does not work correctly with the chunk system
@@ -17,13 +17,6 @@ To properly overlap different chunks, the last value of each heightmap is scaled
 % Describe the parameters of the system, and how they are used to create the heightmap.
 The parameters that influence the algorithm are shown in table \ref{tab:perlin-parameters}. In this table we make a distinction between parameters that are set by the system because they are constant or implicit based on other systems such as the chunk system, and parameters that can be influenced by a designer.
 The width and depth of the system will be fixed, since the amount of vertices in a chunk is deemed to be constant. The offset and seed are implicit in the execution of the program, since the offset is defined by which chunk will be generated and the seed is constant per generation of the system, to provide the same base noise offsets for all chunks.
-
-% Width
-% Depth
-% Scale
-% Octaves
-% Persistance
-% Lacunarity
 
 \begin{table}[ht]
 \begin{tabularx}{\linewidth}{|l|l|l|X|}
@@ -59,11 +52,11 @@ Lacunarity & Float & $\geq 0$ & How much the frequency of the noise is increased
 \subsubsection{Rivers}
 % The generation of rivers and ponds consist of 2 separate tasks.
 The generation of rivers consist of 2 separate tasks. The first step is to plan the route shape of the river. After that, the path can be combined with a profile to generate the water.
-To plan the river, we use the same system as used by Teoh \cite{teoh_riverland_2009}. In this approach, we plan a route by placing points in a direction that is randomly offset each point. Between each point we place an additional point such that the river meanders along the route.
+To plan the river, we use the same system as used by Teoh \cite{teoh_riverland_2009}. In this approach, we select a random point as a starting point, and another point on a different side of the terrain as the initial direction. We then plan a route by placing points in a direction that is randomly offset each point. Between each point we place an additional point such that the river meanders along the route.
 To generate the shape of the river, we transform the curve into a fat curve, as done in the system proposed by Huijser \cite{huijser_procedural_2010}. For each point in the curve, the width of the river is used to construct a line perpendicular to the point on the curve. The line creates a triangle mesh with triangles between the curve points. To create a smoother curve, we interpolate the points using a bézier curve through the curve points. Using this fat curve we can check whether a point is inside or outside the curve, and by using the barycentric coordinates of a point we can calculate at what position in the cross-section of the curve a point belongs.
 
 % Parameters of River
-The parameters used to plan the path of the curve are shown in Table \ref{tab:river-planning-paremeters}. The parameters used to create the fat curve are shown in Table \ref{tab:river-fatcurve-parameters}. % Add explanation of param types
+The parameters used to plan the path of the curve are shown in Table \ref{tab:river-planning-parameters}. The parameters used to create the fat curve are shown in Table \ref{tab:river-fatcurve-parameters}. \todo{Add explanation of param types}
 
 % Parameter path planning
 \begin{table}[ht]
@@ -101,10 +94,6 @@ tangentLength & float & $> 0$ & The size of the tangents of the bezier curve. \\
 
 interpolationPoints & int & $\geq 0$ & The amount of interpolation points on the curve. \\
 
-ControlPoint.position & Vector3 & $\mathbb{R}^3$ & The position of each control point on the curve. \\
-
-ControlPoint.width & float & $> 0$ & The width of the river along each control point. \\
-
 \hline
 
 \end{tabularx}
@@ -112,41 +101,17 @@ ControlPoint.width & float & $> 0$ & The width of the river along each control p
 \label{tab:river-fatcurve-parameters}
 \end{table}
 
-\subsubsection{Placing vegetation}
+\subsubsection{Placing vegetation} \label{sec:architecture-vegetationplacement}
 % Placing vegetation has to adhere to a few rules
 In the system, we introduce two different types of placing vegetation. The first method uses the Poisson Disk Distribution to generate points that have a minimum distance from each other. To generate the points, the paper of Bridson \cite{bridson_fast_2007} is used. We have expanded this initial algorithm so that it is able to be used with multiple types of points, where each type of point has a different minimal distance. This approach can be used to generate multiple different types of vegetation.
 
 To generate different types of vegetation, we separate the types of vegetation into different layers, similar to the solution provided by do Nascimento et al. \cite{do_nascimento_gpu-based_2018}. For each separate layer, points are randomly generated. Based on the paper of Bridson, we use a 2-dimensional grid to store the points, with the size of each grid cell being equal to $d / \sqrt{2}$, where $d$ is the minimum distance of two points, which is twice the radius of the object on the layer. Given a boundary where the points lie, the algorithm places points around already generated points until there is no point that can be the neighbour of a new point.
 
-The parameters that describe the placement of points on a single layer are shown in table \ref{tab:pdd-single-layer}. The retries parameter is constant, and a value of 30 is typically used.\\
-
-% Parameter table single-layer PDD
-\begin{table}[ht]
-\begin{tabularx}{\linewidth}{|l|l|l|X|}
-\hline
-Name & Type & Bounds & Description\\
-\hline
-
-bounds & AABB & Area > 0 & The area wherein objects can be placed. \\
-\hline
-
-radius & float & $> 0$ & The radius of an object, or half the minimum distance between points. \\
-
-\hline
-
-retries & int & $\geq 0$ & How many times an already generated point tries to generate an adjacent point until it fails. \\
-\hline
-
-\end{tabularx}
-\caption{The parameters used for generating a PDD layer}
-\label{tab:pdd-single-layer}
-\end{table}
-
-To combine multiple layers generated by the PDD, we generate all layers from large to small, and when each layer is generated, all points are filtered by checking if there is overlap with a larger layer. In our system, we can assign a different radius for objects in the same layer as objects in a lower layer. The justification for this is as follows: When placing trees in an environment, their canopies cannot overlap but smaller objects, such as bushes, can be placed within the radius of the canopy but are still blocked by the size of the trunk.
+To combine multiple layers generated by the PDD, we generate all layers from large to small, and when each layer is generated the points are filtered by checking if there is overlap with a higher layer. In our system, we can assign a different radius for objects in the same layer as objects in a lower layer. The justification for this is as follows: When placing trees in an environment, their canopies cannot overlap but smaller objects, such as bushes, can be placed within the radius of the canopy but are still blocked by the size of the trunk.
 
 As different layers have different radii, their 2-dimensional grid structure have different sizes. While in the single layer algorithm we only had to check the 8 neighbours of a cell, the size of the neighbourhood differs when different sized grids are used. The radius of the neighbourhood equals $\lceil (r_1 + r_2) / cell\_size_1 \rceil$, with $r_1, cell\_size_1$ corresponding to the larger layer and $r_2$ being the radius of the smaller layer.
 
-The parameters used in the Multi-layer PDD algorithm are shown in table \ref{tab:pdd-multi-layer}. For each layer of the input, the algorithm returns the positions that do not overlap with higher layers.
+The parameters used in the Multi-layer PDD algorithm are shown in table \ref{tab:pdd-multi-layer}. For each layer of the input, the algorithm returns the generated positions that do not overlap with higher layers.
 
 % Parameter table Multi-layer PDD
 \begin{table}[ht]
@@ -155,19 +120,12 @@ The parameters used in the Multi-layer PDD algorithm are shown in table \ref{tab
 Name & Type & Bounds & Description\\
 \hline
 
-bounds & AABB & Area $> 0$ & The area wherein objects can be placed.\\
-\hline
+retries & int & $ > 0 $ & The amount of attempts to place a point. \\
 
-layers & Layer[] & size $> 0$ & The different layers of object used in the algorithm.\\
-\hline
+Layer.layerRadius & float & $> 0$ & The PDD radius used for objects in the same layer.\\
 
-Layer.layerRadius & float & $> 0$ & The radius of the object within the same layer.\\
-\hline
+\makecell{Layer.\\innerLayerRadius} & float & \makecell{$0 < r \leq$\\$layerRadius$} & The PDD radius used for objects in lower layers.\\
 
-Layer.innerRadius & float & $> 0$ & The radius of the object when checking lower layers.\\
-\hline
-
-retries & int & $\geq 0$ & How many times an already generated point tries to generate an adjacent point until it fails. \\
 \hline
 
 \end{tabularx}
@@ -179,7 +137,7 @@ Our second approach follows the method proposed by Lane et al. \cite{lane_genera
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/deformation_kernel_example.png}
+    \includegraphics[width=0.9\linewidth]{figures/architecture/deformation_kernel_example.png}
     \caption{Examples of kernels that can be used in the deformation kernel algorithm, from \cite{lane_generating_2002}.}
     \label{fig:deformation_kernel_example}
 \end{figure}
@@ -192,22 +150,12 @@ Our second approach follows the method proposed by Lane et al. \cite{lane_genera
 Name & Type & Bounds & Description\\
 \hline
 
-bounds & AABB & Area $> 0$ & The area wherein objects can be placed.\\
-\hline
-
-deformationObject & DeformationKernel & & The deformation kernel used in updating the density function.\\
-\hline
-
-DeformationKernel.curve & AnimationCurve & $f(x) \in [0, 1]$ & The function that is used to deform the probability density function.\\
-\hline
-
-DeformationKernel.radius & float & $> 0$ & The size of the influence of the deformation kernel.\\
-\hline
-
 iterations & int & $\geq 0$ & The amount of objects to be placed.\\
-\hline
 
-fieldSize & int & $> 0$ & The size of the array used as probability density function.\\
+\makecell{DeformationKernel.\\curve} & AnimationCurve & $f(x) \in [0,1]$ & The function used by the kernel from  the center to the edge of kernel.\\
+
+\makecell{DeformationKernel.\\radius} & float & $> 0$ & The size of the kernel.\\
+
 \hline
 
 \end{tabularx}

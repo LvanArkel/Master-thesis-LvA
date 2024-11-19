@@ -16,7 +16,7 @@ Instead of noise functions, a midpoint displacement algorithm is another way to 
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{figures/Diamond_Square}
+    \includegraphics[width=\textwidth]{figures/background/Diamond_Square.png}
     \caption{Two iterations of the diamond-square algorithm. The yellow dots represent the vertices manipulated in each operation, and the black dots represent the values used in interpolation\protect\footnotemark.}
     \label{fig:diamond_square}
 \end{figure}
@@ -32,7 +32,7 @@ Hydraulic erosion models the use of water to transport sediment from higher loca
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{figures/Hydraulic_erosion.PNG}
+    \includegraphics[width=\textwidth]{figures/background/Hydraulic_erosion.PNG}
     \caption{An example of water transport in a hydraulic erosion simulation, from \cite{olsen_realtime_2004}.}
     \label{fig:hydraulic-erosion}
 \end{figure}
@@ -74,11 +74,11 @@ An easy way to place vegetation is by planting each plant randomly. As each plan
 
 \begin{figure}
     \begin{subfigure}[h]{0.5\linewidth}
-        \includegraphics[width=\linewidth]{figures/distribution_random.png}
+        \includegraphics[width=\linewidth]{figures/background/distribution_random.png}
         \caption{Random distribution}
     \end{subfigure}
     \begin{subfigure}[h]{0.5\linewidth}
-        \includegraphics[width=\linewidth]{figures/distribution_pdd.png}
+        \includegraphics[width=\linewidth]{figures/background/distribution_pdd.png}
         \caption{PDD distribution}
     \end{subfigure}
     \caption{Comparison of Random and Poisson Disk Distributions for 200 samples}
@@ -118,29 +118,29 @@ Another way to place vegetation is to perform an ecosystem simulation. This tech
 % Procedural Generation and Rendering of Realistic, Navigable Forest Environments: An Open-Source Tool
 % Realistic modeling and rendering of plant ecosystems
 
+% --- Section removed: out of scope ---
+% \subsubsection{Blending environments}
+% To add variety to the generated landscape, adding different types of terrain might be valuable. An example is the edge of a forest, where one section of the terrain consists of grassland, and the rest is the forest. In ecology, the concept of biomes has been established to categorise different types of terrain. Using metrics such as average temperature or the amount of precipitation allows different environments to be categorised. Two popular ways of categorising biomes are those from Holdridge and Whittaker \cite{mucina_biome_2019}. Holdridge's scheme, developed in 1947, uses three metrics; average temperature, precipitation and evapotranspiration, the process that moves water into the atmosphere by evaporating from the ground, or transpiration from trees and vegetation. The system of Whittaker, proposed in 1970, uses only the average temperature and precipitation to categorise different biomes. The two schemes can be seen in figure \ref{fig:biome_schemes}.
 
-\subsubsection{Blending environments}
-To add variety to the generated landscape, adding different types of terrain might be valuable. An example is the edge of a forest, where one section of the terrain consists of grassland, and the rest is the forest. In ecology, the concept of biomes has been established to categorise different types of terrain. Using metrics such as average temperature or the amount of precipitation allows different environments to be categorised. Two popular ways of categorising biomes are those from Holdridge and Whittaker \cite{mucina_biome_2019}. Holdridge's scheme, developed in 1947, uses three metrics; average temperature, precipitation and evapotranspiration, the process that moves water into the atmosphere by evaporating from the ground, or transpiration from trees and vegetation. The system of Whittaker, proposed in 1970, uses only the average temperature and precipitation to categorise different biomes. The two schemes can be seen in figure \ref{fig:biome_schemes}.
+% \begin{figure}
+%     \centering
+%     \begin{subfigure}{0.45\linewidth}
+%         \includegraphics[width=\linewidth]{figures/biome_holdridge.png}
+%         \caption{Model of biomes proposed by Holdridge.}
+%         \label{fig:biome_holdridge}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}{0.45\linewidth}
+%         \includegraphics[width=\linewidth]{figures/biome_whittaker.png}
+%         \caption{Model of biomes proposed by Whittaker.}
+%         \label{fig:biome_whittaker}
+%     \end{subfigure}
 
-\begin{figure}
-    \centering
-    \begin{subfigure}{0.45\linewidth}
-        \includegraphics[width=\linewidth]{figures/biome_holdridge.png}
-        \caption{Model of biomes proposed by Holdridge.}
-        \label{fig:biome_holdridge}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}{0.45\linewidth}
-        \includegraphics[width=\linewidth]{figures/biome_whittaker.png}
-        \caption{Model of biomes proposed by Whittaker.}
-        \label{fig:biome_whittaker}
-    \end{subfigure}
+%     \caption{Two classification models of biomes, retrieved from \cite{mucina_biome_2019}.}
+%     \label{fig:biome_schemes}
+% \end{figure}
 
-    \caption{Two classification models of biomes, retrieved from \cite{mucina_biome_2019}.}
-    \label{fig:biome_schemes}
-\end{figure}
-
-In the previous example, the biome was determined by climate parameters. The type of environment can also be established by using other procedurally generated data. For instance, the terrain itself can also provide information on what the terrain should look like \cite{hammes_modeling_2001}, such as the slope, elevation and humidity of the terrain. Additionally, the presence and rivers and the overall humidity of the ground can influence the terrain generated \cite{do_nascimento_gpu-based_2018} \cite{van_muijden_gpu-based_2017}. In these examples, each type of plant or tree has a preferred range of parameters in which it will be generated.
+% In the previous example, the biome was determined by climate parameters. The type of environment can also be established by using other procedurally generated data. For instance, the terrain itself can also provide information on what the terrain should look like \cite{hammes_modeling_2001}, such as the slope, elevation and humidity of the terrain. Additionally, the presence and rivers and the overall humidity of the ground can influence the terrain generated \cite{do_nascimento_gpu-based_2018} \cite{van_muijden_gpu-based_2017}. In these examples, each type of plant or tree has a preferred range of parameters in which it will be generated.
 
 \subsection{Connecting components}
 The previous sections have elaborated on different components used in procedural terrain generation. To generate terrain that resembles a landscape, these features must be combined. The following section describes different ways that these components can be connected, and how the requirements of each component interact with other components.

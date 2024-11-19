@@ -2,23 +2,54 @@
 % Describe how different components inter4act and how we have designed our architecture
 
 \subsubsection{Architecture of the system}
-We have split up the tasks of generating the terrain into multiple components. Some of the components use the techniques described in the previous chapter to generate a single component of the system, while other components combine these components. The architecture of the system is shown in figure \ref{fig:system-architecture}. In this diagram, each different component of the system is shown in a rectangle, while each datatype is shown in a ellipse.
+We have split up the tasks of generating the terrain into multiple components. Some of the components use the techniques described in the previous chapter to generate a single component of the system, while other components combine these components. The architecture of the system is shown in figure \ref{fig:system-architecture}. In this diagram, each different component of the system is shown in a rectangle, while each data type is shown in an ellipse.
 
 In this system, we first generate the surface terrain, and a curve for each river. With this curve, we generate a fat curve. To improve the performance of the system, we calculate for each chunk which triangles of the river intersect with the bounds of the chunk. This is done by component (4). With this information, the terrain is modified with the riverbed, and the river is used to generate the initial deformation fields that is used to generate the object placements.
 
-The components labelled with the numbers (1), (2) and (3) are described in section \ref{sec:architecture-singlecomponent}. The rest of this section describes the other components of the system.
+The components labelled with the numbers (1), (2), (3), (4), (7.1) and (7.2) are described in section \ref{sec:architecture-singlecomponent}. The rest of this section describes the other components of the system.
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.9\linewidth]{figures/Architecture.drawio.png}
+    \includegraphics[width=0.9\linewidth]{figures/architecture/Architecture.drawio.png}
     \caption{A block diagram of the system's architecture}
     \label{fig:system-architecture}
 \end{figure}
 
 \subsubsection{Combining terrain and curves}
-To combine the river with the terrain we need to evaluate each point of the terrain, which is done by component (5). Using the method described in \cite{huijser_procedural_2010} we can check whether a point is located on the river, and at what part of the cross-section the point is located. With the cross-section profile provided the change in elevation is calculated. The height of the terrain is set to the base height of the terrain reduced by the river profile. To smoothen the riverbed, the base height is interpolated between the heights of the side of the river.
+To combine the river with the terrain we need to evaluate each point of the terrain, which is done by component (5). Using the method described in \cite{huijser_procedural_2010} we can check whether a point is located on the river, and at what part of the cross-section the point is located. With the cross-section profile provided the change in elevation is calculated. The height of the terrain is updated to the base height of the terrain reduced by the river profile. To smoothen the riverbed, the base height is interpolated between the heights of the side of the river.
 
 \subsubsection{Masking object placement based on curves}
+To prevent the placement of objects on places such as water, we need to mask the placement of objects with rivers. The system uses two separate methods of placing objects, and therefore requires different kinds of masking.
+
+For the PDD placement, we add an additional check to the multi-level PDD algorithm as described in section \ref{sec:architecture-vegetationplacement}. When a set of objects is generated, they are filtered based on their intersection with a river. The size of the object is based on the inner radius, such that the trunks of the tree never intersect with a river, but their canopy can be above a river.
+
+When generating objects using the deformation kernel method, we use a deformation field. To change the location where objects can be placed, the initial deformation field is modified with the fat curve of the rivers. In the system, this is done by component (6). The deformation field generator creates a deformation field based on the bounds of the terrain. The parameters used by the deformation field generator can be found in table \ref{tab:parameters-deformation-field-generator}.
+By separating the initial probability of a point placed outside and inside of a river, this method allows for objects that should be placed near rivers, such as reeds.
+
+\begin{table}[ht]
+\begin{tabularx}{\linewidth}{|l|l|l|X|}
+\hline
+Name & Type & Bounds & Description\\
+\hline
+
+initial probability & float & $\geq 0$ & The initial probability of a point not on a river.\\
+\hline
+
+river probability & AnimationCurve & $ f(x) \in [0,1] $ & The initial probability of a point on a river, evaluated on the cross-section of the river.\\
+\hline
+
+\end{tabularx}
+\caption{The parameters used for generating an initial deformation field}
+\label{tab:parameters-deformation-field-generator}
+\end{table}
 
 \subsubsection{Combining object placement methods}
+The system uses the two techniques for placing vegetation. For larger vegetation the PDD placement is used as it gives the guarantee of objects spaced a certain distance from each other. For smaller vegetation the deformation kernel approach is used as it results in objects being placed more randomly, which results in a more realistic look.
 
+To combine both methods the Object placement generator, which is component (7) in the architecture, is used. This component uses components (7.1) and (7.2), which are described in chapter \ref{sec:architecture-vegetationplacement}. Firstly, the larger vegetation is generated using the PDD. To prevent smaller vegetation being placed within these objects, all placements are added to the deformation field using the inner radius. The probability on those locations is set to 0. When positions are generated by the deformation field generator, all vegetation is instantiated and placed on the terrain. For each point the height of the terrain is evaluated to place the object on the proper location.
+
+\subsubsection{Finalising terrain}
+When all components are generated and combined, some final steps are performed to transform our data structures into a terrain. Firstly, the heightmap of the terrain is rasterized into a mesh. Based on the fat curves of the river, meshes are generated for the river and placed in the landscape.
+
+After this, the placement objects are instantiated based on a prefab assigned to each object. The height of the instantiated object is derived by looking up the height in the heightmap.
+Finally, the camera is placed in the scene. The camera is placed on the side of the terrain, centred in the middle.
