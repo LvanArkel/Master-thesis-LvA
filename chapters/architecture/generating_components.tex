@@ -18,7 +18,7 @@ To properly overlap different chunks, the last value of each heightmap is scaled
 The parameters that influence the algorithm are shown in table \ref{tab:perlin-parameters}. In this table we make a distinction between parameters that are set by the system because they are constant or implicit based on other systems such as the chunk system, and parameters that can be influenced by a designer.
 The width and depth of the system will be fixed, since the amount of vertices in a chunk is deemed to be constant. The offset and seed are implicit in the execution of the program, since the offset is defined by which chunk will be generated and the seed is constant per generation of the system, to provide the same base noise offsets for all chunks.
 
-\begin{table}[ht]
+\begin{table}[h!]
 \begin{tabularx}{\linewidth}{|l|l|l|X|}
 \hline
 Name & Type & Bounds & Description\\
@@ -27,7 +27,7 @@ Width & Int & $\geq 1$ & The width of the heightmap in vertices\\
 
 Depth & Int & $\geq 1$ & The depth of the heightmap in vertices\\
 
-Coordinates & Vec2Int & $\mathbb{Z}^2$ & The chunk coordinates of the generating chunk\\
+Coordinates & Vec2Int & $\mathbb{Z}^2$ & The coordinates of the generated chunk in the grid\\
 
 \hline
 
@@ -45,10 +45,6 @@ Lacunarity & Float & $\geq 0$ & How much the frequency of the noise is increased
 \label{tab:perlin-parameters}
 \end{table}
 
-% Parameter analysis
-
-% Texturing (Still to be implemented)
-
 \subsubsection{Rivers}
 % The generation of rivers and ponds consist of 2 separate tasks.
 The generation of rivers consist of 2 separate tasks. The first step is to plan the route shape of the river. After that, the path can be combined with a profile to generate the water.
@@ -59,7 +55,7 @@ To generate the shape of the river, we transform the curve into a fat curve, as 
 The parameters used to plan the path of the curve are shown in Table \ref{tab:river-planning-parameters}. The parameters used to create the fat curve are shown in Table \ref{tab:river-fatcurve-parameters}. \todo{Add explanation of param types}
 
 % Parameter path planning
-\begin{table}[ht]
+\begin{table}[h!]
 \begin{tabularx}{\linewidth}{|l|l|l|X|}
 \hline
 Name & Type & Bounds & Description\\
@@ -75,7 +71,7 @@ segmentLength & float & $> 0$ & The distance between each river point. \\
 
 maxSegmentRotation & float & $\geq 0$ & The maximum angle that the river curves at each point.\\
 
-meanderAmplitude & float & $\geq 0 $ & The offset of the meandering points.\\ % TODO phrase better
+meanderAmplitude & float & $\geq 0 $ & The offset of the meandering points.\todo{Phrase better}\\
 
 \hline
 \end{tabularx}
@@ -84,7 +80,7 @@ meanderAmplitude & float & $\geq 0 $ & The offset of the meandering points.\\ % 
 \end{table}
 
 % Parameter table fatcurve
-\begin{table}[ht]
+\begin{table}[h!]
 \begin{tabularx}{\linewidth}{|l|l|l|X|}
 \hline
 Name & Type & Bounds & Description\\
@@ -114,7 +110,7 @@ As different layers have different radii, their 2-dimensional grid structure hav
 The parameters used in the Multi-layer PDD algorithm are shown in table \ref{tab:pdd-multi-layer}. For each layer of the input, the algorithm returns the generated positions that do not overlap with higher layers.
 
 % Parameter table Multi-layer PDD
-\begin{table}[ht]
+\begin{table}[h!]
 \begin{tabularx}{\linewidth}{|l|l|l|X|}
 \hline
 Name & Type & Bounds & Description\\
@@ -144,7 +140,7 @@ Our second approach follows the method proposed by Lane et al. \cite{lane_genera
 
 \todo{Fix formatting of table}
 % Parameter table Deformation kernel
-\begin{table}[ht]
+\begin{table}[h!]
 \begin{tabularx}{\linewidth}{|l|l|l|X|}
 \hline
 Name & Type & Bounds & Description\\

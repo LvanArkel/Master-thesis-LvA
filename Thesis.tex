@@ -9,16 +9,22 @@
 \usepackage{subcaption}
 \usepackage{svg}
 \usepackage{tabularx}
-\usepackage[disable]{todonotes}
-%\usepackage{todonotes}
+% \usepackage[disable]{todonotes}
+\usepackage{todonotes}
 \usepackage{url}
 
-\title{Procedural generation of fixed-viewpoint digital nature landscapes.}
+\title{Procedural generation and validation of fixed-viewpoint digital nature landscapes.}
 \author{Lars van Arkel}
 
 \begin{document}
 
 \maketitle
+%\input{chapters/title}
+
+\tableofcontents
+\newpage
+
+\input{chapters/abstract}
 
 \input{chapters/introduction}
 
@@ -30,19 +36,15 @@
 
 \input{chapters/architecture}
 
-\input{chapters/parameters}
-
 \input{chapters/validation}
 
-%\input{chapters/discussion}
+\input{chapters/discussion}
 
-%\input{chapters/futurework}
+\input{chapters/futurework}
 
-%\input{chapters/conclusion} % Possibly merge futurework/conclusion
+\input{chapters/conclusion}
 
-% discussion
-
-% future work
+%\input{chapters/appendices}
 
 \bibliographystyle{plain} % We choose the "plain" reference style
 \bibliography{references} % Entries are in the refs.bib file

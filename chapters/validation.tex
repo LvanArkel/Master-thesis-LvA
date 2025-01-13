@@ -1,7 +1,29 @@
 \section{Validation}
+To validate the terrain, we look at multiple features of our generated environments, and how the generation is influenced by the parameters of the system. For this, we have chosen 3 metrics we want to analyse.
 % Discuss different ways of validating the terrain.
 % Describe what we want, and why we want this
     % See rivers from the fixed-point
+
+\subsection{Pdd placement and object density}
+In the PDD placement algorithm the placement of the objects is dependent on the radius of each layer. Changing the radius of an object changes the minimum distance between two objects. The density of the objects placed can therefore be changed by increasing the radius. To show the effect of the radius on the density, we take an initial radius $r$ that represents the bounds of the object itself. We increase this radius by a factor $f$ and run the algorithm. From the amount of points placed we calculate the area that the points occupy with the original radius, and calculate the density. To see the effect of increasing the radius of an object, we take a range from 1 to 4, with increments of 0.2. For each ratio, we run the algorithm 500 times, and calculate the density by calculating the circular area of the initial radius. The results of this example are shown in figure \ref{fig:pdd-parameters-example}, along with a few examples showing the change of radius. In the graph we can see that increasing the layer radius reduces the places that objects can be placed. % Should probably write more.
+
+
+\begin{figure}
+    \begin{subfigure}{.5\textwidth}
+        \includegraphics[width=\linewidth]{figures/parameters/pdd-parameters-graph.png}
+    \end{subfigure}
+    \begin{subfigure}{.5\textwidth}
+        \includegraphics[width=\linewidth]{figures/parameters/pdd-parameters-example-1.png}
+    \end{subfigure}
+    \begin{subfigure}{.5\textwidth}
+        \includegraphics[width=\linewidth]{figures/parameters/pdd-parameters-example-2.png}
+    \end{subfigure}
+    \begin{subfigure}{.5\textwidth}
+        \includegraphics[width=\linewidth]{figures/parameters/pdd-parameters-example-3.png}
+    \end{subfigure}
+    \caption{Graph of the influence of radius on density, and examples of increasing the radius (blue) on an initial radius (red)}
+    \label{fig:pdd-parameters-example}
+\end{figure}
 
 \subsection{Object segmentation}
 When validating the terrain, we want to make a distinction between different types of objects, such as the difference between the ground and rivers, or between the sky and placement objects. To solve this we use object segmentation, which is regularly used in computer vision \cite{kirillov_panoptic_2019}. In object segmentation we make a distinction between semantic segmentation, where all objects of the same type have the same colour, and panoptic segmentation, where each object has a different colour, regardless of it's type.
@@ -36,14 +58,14 @@ To test the visibility of the river, we take 500 samples of generated terrain, o
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\linewidth]{figures/validation/2024-11-18_01-58-45_histogram.png}
+    \includegraphics[width=0.8\linewidth]{figures/validation/river-visibility-hist.png}
     \caption{Histogram of the results of the river visibility test}
     \label{fig:river-visibility}
 \end{figure}
 
 \begin{figure}
     \begin{subfigure}{.5\textwidth}
-        \includegraphics[width=\linewidth]{figures/validation/2024-11-18_01-58-45_9.png}
+        \includegraphics[width=\linewidth]{figures/validation/river-visibility-invisible-segmented.png}
         \caption{Segmented view of a terrain without visible river}
         \label{fig:river-visibility-results-low}
     \end{subfigure}
@@ -53,12 +75,12 @@ To test the visibility of the river, we take 500 samples of generated terrain, o
         \label{fig:river-visibility-results-low-world}
     \end{subfigure}
     \begin{subfigure}{.5\textwidth}
-        \includegraphics[width=\linewidth]{figures/validation/2024-11-18_01-58-45_210.png}
+        \includegraphics[width=\linewidth]{figures/validation/river-visibility-high-segmented.png}
         \caption{Segmented view of terrain with the most visible river}
         \label{fig:river-visibility-results-high}
     \end{subfigure}
     \begin{subfigure}{.5\textwidth}
-        \includegraphics[width=\linewidth]{figures/validation/2024-11-18_01-58-45_51.png}
+        \includegraphics[width=\linewidth]{figures/validation/river-visibility-medium-segmented}
         \caption{Segmented view of terrain with medium visible river}
         \label{fig:river-visibility-results-medium}
     \end{subfigure}
@@ -72,7 +94,7 @@ To test the improvement of this system, we perform the river visibility experime
 
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\linewidth]{figures/validation/2024-11-18_02-34-03_histogram.png}
+    \includegraphics[width=0.8\linewidth]{figures/validation/river-visibility-improved-hist.png}
     \caption{Histogram of the results of the river visibility test with the best camera position.}
     \label{fig:river-visibility-optimized}
 \end{figure}
@@ -84,4 +106,59 @@ To test the improvement of this system, we perform the river visibility experime
 % Show examples of good/bad river representation.
 
 \subsection{Single-object occlusion}
+As trees are placed randomly on the terrain, ensuring that a large part of the view is obscured by a single or a few trees is important. Because of this it is important to evaluate the proportion of an individual object to the scene.
 
+To calculate the individual proportion, we use panoptic segmentation to separate the different trees in the image. For each tree in the view, we calculate visibility in the terrain, as well as the position of the object relative to the camera.
+
+As a test, we generate the terrain 500 times, and calculate the panoptic segmented image from the terrain. From the position relative to the camera, we calculate the distance from the object to the camera and the size of the object in pixels as a fraction of the total size. The result of these experiments can be found in figure \ref{fig:tree-visibility-scatter}. In table \ref{tab:single-object-results} a breakdown of the objects and their sizes is shown.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/validation/tree-visibility-scatter.png}
+    \caption{A plot of the distances and sizes of each object in the experiments.}
+    \label{fig:tree-visibility-scatter}
+\end{figure}
+
+\begin{table}[]
+\begin{tabular}{|l|l|l|}
+\hline
+Size of objects  & \# of objects & Percentage       \\ \hline
+\textgreater 10\% & 633           & 3.71\%           \\ \hline
+\textgreater 20\% & 195           & 1.14\%           \\ \hline
+\textgreater 30\% & 94            & 0.55\%           \\ \hline
+\textgreater 40\% & 48            & 0.28\%           \\ \hline
+\textgreater 50\% & 27            & 0.16\%           \\ \hline
+\textgreater 60\% & 17            & 0.10\%           \\ \hline
+\textgreater 70\% & 7             & 0.04\%           \\ \hline
+\textgreater 80\% & 3             & 0.02\%           \\ \hline
+\textgreater 90\% & 1             & \textless 0.01\% \\ \hline
+\end{tabular}
+\caption{Breakdown of the sizes of the objects in the frame.}
+\label{tab:single-object-results}
+\end{table}
+
+In these results we can see that most of the objects only cover a small proportion of the screen. Only 3.7\% of the objects cover a section larger than 10\% of the total screen. It is still possible that a single objects occupies a very large section of the screen. In figure \ref{fig:single-object-large} an example of a terrain is shown where a single object occupies a large section of the window. The tree is placed close to the camera, with only 6.6 units, and obstructs a large part of the view of the camera.
+
+\begin{figure} 
+    \begin{subfigure}{0.5\linewidth}
+        \includegraphics[width=\linewidth]{figures/validation/tree-visibility-high-regular.png}
+    \end{subfigure}
+    \begin{subfigure}{0.5\linewidth}
+        \includegraphics[width=\linewidth]
+        {figures/validation/tree-visibility-high-segmented.png}
+    \end{subfigure}
+    \caption{Example of a view obstructed by a single object}
+    \label{fig:single-object-large}
+\end{figure}
+
+\subsubsection{Improving single-object occlusion}
+As seen in figure \ref{fig:tree-visibility-scatter}, most objects with a very large visibility are placed within 15 units of the camera. All objects that cover more than 30\% of the screen are placed within 11 units of the camera. To prevent occlusion by a single object, we change the PDD placement algorithm (Section \ref{sec:architecture-vegetationplacement}) to remove objects that are closer than a certain distance from the camera, similar to how objects are filtered to not overlap with a river. The second round of experiments can be seen in figure \ref{fig:tree-visibility-improved-scatter}. This approach significantly reduces the maximum portion of the screen that a single object occupies.
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\linewidth]{figures/validation/tree-visibility-improved-scatter.png}
+    \caption{A plot of the distances and sizes of each object in the experiments with camera distance filtering of 11 units.}
+    \label{fig:tree-visibility-improved-scatter}
+\end{figure}
+
+% Describe the results of the single-object occlusion.

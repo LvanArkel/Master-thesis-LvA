@@ -1,5 +1,5 @@
 \subsection{Connecting components}
-% Describe how different components inter4act and how we have designed our architecture
+In the system, the different components interact with each other, and the generation of some components depend on the result of others. Because of this, an architecture is created that can combine creation of all components.
 
 \subsubsection{Architecture of the system}
 We have split up the tasks of generating the terrain into multiple components. Some of the components use the techniques described in the previous chapter to generate a single component of the system, while other components combine these components. The architecture of the system is shown in figure \ref{fig:system-architecture}. In this diagram, each different component of the system is shown in a rectangle, while each data type is shown in an ellipse.
